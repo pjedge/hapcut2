@@ -112,7 +112,8 @@ int parse_bamfile_sorted(char* bamfile, HASHTABLE* ht, CHROMVARS* chromvars, VAR
     int prevfragments = 0;
     FRAGMENT fragment;
     fragment.variants = 0;
-    fragment.alist = (allele*) malloc(sizeof (allele)*1000);
+    fragment.mlist = 1000;
+    fragment.alist = (allele*) malloc(sizeof (allele)*fragment.mlist);
 
     samfile_t *fp;
     if ((fp = samopen(bamfile, "rb", 0)) == 0) {

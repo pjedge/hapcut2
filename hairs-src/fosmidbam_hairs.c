@@ -255,7 +255,8 @@ int parse_bamfile_fosmid(char* bamfile, HASHTABLE* ht, CHROMVARS* chromvars, VAR
 
     FRAGMENT fragment;
     fragment.variants = 0;
-    fragment.alist = (allele*) malloc(sizeof (allele)*10000);
+    fragment.mlist = 10000;
+    fragment.alist = (allele*) malloc(sizeof (allele)*fragment.mlist);
     FRAGMENT* flist = (FRAGMENT*) malloc(sizeof (FRAGMENT) * MAX_READS / 5);
     int fragments = 0;
 

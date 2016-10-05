@@ -14,6 +14,15 @@ int compare_alleles(const void *a, const void *b) {
     else return ((allele*) a)->varid - ((allele*) b)->varid;
 }
 
+void extend_alist(FRAGMENT *fragment, int min_variants) {
+    if (min_variants < fragment->mlist) return;
+    while (fragment->mlist < min_variants) {
+        if (fragment->mlist < 16) fragment->mlist = 16;
+        else fragment->mlist <<= 2; 
+    }
+    fragment->alist = (allele*) realloc(fragment->alist, sizeof(allele) * fragment->mlist);
+}
+
 int print_fragment(FRAGMENT* fragment, VARIANT* varlist, FILE* outfile) {
     if (PRINT_FRAGMENTS == 0) return 0;
     int i = 0;
@@ -121,7 +130,8 @@ void clean_fragmentlist(FRAGMENT* flist, int* fragments, VARIANT* varlist, int c
     int i = 0, j = 0, k = 0, first = 0, sl = 0;
     FRAGMENT fragment;
     fragment.variants = 0;
-    fragment.alist = (allele*) malloc(sizeof (allele)*1000);
+    fragment.mlist = 10000;
+    fragment.alist = (allele*) malloc(sizeof (allele)*fragment.mlist);
     if (*fragments > 1) qsort(flist, *fragments, sizeof (FRAGMENT), compare_fragments);
     // sort such that mate pairs are together and reverse sorted by starting position of second read in a mate-piar
     //for (i=0;i<*fragments;i++) fprintf(stdout,"frag %s %d vars %d \n",flist[i].id,flist[i].alist[0].varid,flist[i].variants);
@@ -130,7 +140,7 @@ void clean_fragmentlist(FRAGMENT* flist, int* fragments, VARIANT* varlist, int c
         first = 0;
         while (flist[first].matepos >= currpos && first < *fragments) first++;
     }
-    //	fprintf(stdout,"cleaning the fragment list: current chrom %d %d first %d fragments %d\n",currchrom,currpos,first,*fragments);
+    //    fprintf(stdout,"cleaning the fragment list: current chrom %d %d first %d fragments %d\n",currchrom,currpos,first,*fragments);
 
     if (*fragments > 1) // bug fixed jan 13 2012, when there is only one fragment, we don't need to check if it is part of mate-pair
     {
@@ -149,6 +159,7 @@ void clean_fragmentlist(FRAGMENT* flist, int* fragments, VARIANT* varlist, int c
                     fragment.variants = 0;
                     while (j < flist[i].variants || k < flist[i + 1].variants) {
                         if (j >= flist[i].variants) {
+                            extend_alist(&fragment, fragment.variants+1);
                             fragment.alist[fragment.variants].varid = flist[i + 1].alist[k].varid;
                             fragment.alist[fragment.variants].allele = flist[i + 1].alist[k].allele;
                             fragment.alist[fragment.variants].qv = flist[i + 1].alist[k].qv;
@@ -157,6 +168,7 @@ void clean_fragmentlist(FRAGMENT* flist, int* fragments, VARIANT* varlist, int c
                             continue;
                         }
                         if (k >= flist[i + 1].variants) {
+                            extend_alist(&fragment, fragment.variants+1);
                             fragment.alist[fragment.variants].varid = flist[i].alist[j].varid;
                             fragment.alist[fragment.variants].allele = flist[i].alist[j].allele;
                             fragment.alist[fragment.variants].qv = flist[i].alist[j].qv;
@@ -166,12 +178,14 @@ void clean_fragmentlist(FRAGMENT* flist, int* fragments, VARIANT* varlist, int c
                         }
 
                         if (flist[i].alist[j].varid < flist[i + 1].alist[k].varid) {
+                            extend_alist(&fragment, fragment.variants+1);
                             fragment.alist[fragment.variants].varid = flist[i].alist[j].varid;
                             fragment.alist[fragment.variants].allele = flist[i].alist[j].allele;
                             fragment.alist[fragment.variants].qv = flist[i].alist[j].qv;
                             fragment.variants++;
                             j++;
                         } else if (flist[i].alist[j].varid > flist[i + 1].alist[k].varid) {
+                            extend_alist(&fragment, fragment.variants+1);
                             fragment.alist[fragment.variants].varid = flist[i + 1].alist[k].varid;
                             fragment.alist[fragment.variants].allele = flist[i + 1].alist[k].allele;
                             fragment.alist[fragment.variants].qv = flist[i + 1].alist[k].qv;

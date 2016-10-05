@@ -26,6 +26,7 @@ int compare_read_SNP(struct alignedread* read, VARIANT* varlist, int ss, int sta
     }
 
     if (match != '-' && read->quality[l1 + offset] - QVoffset >= MINQ && varlist[ss].type == 0) {
+        extend_alist(fragment, fragment->variants+1);
         fragment->alist[fragment->variants].varid = ss;
         fragment->alist[fragment->variants].allele = match;
         //assign base quality to be minimum of base quality and mapping quality 
@@ -199,6 +200,7 @@ int compare_read_INDEL(struct alignedread* read, VARIANT* varlist, int ss, int s
     if (partialflag == 1 && allele == 1) allele = -1;
     if (pflag) fprintf(stdout, "allele %d\n\n", allele);
     if (allele == 0 || allele == 1) {
+        extend_alist(fragment, fragment->variants+1);
         fragment->alist[fragment->variants].varid = ss;
         fragment->alist[fragment->variants].qv = (char) (quality + QVoffset);
         //if (read->quality[l1+offset] < fragment->alist[fragment->variants].qv) fragment->alist[fragment->variants].qv = read->quality[l1+offset];
@@ -307,7 +309,8 @@ int copy_fragment(FRAGMENT* fnew, FRAGMENT* fragment, struct alignedread* read) 
     int i = 0;
     fnew->variants = fragment->variants;
     fnew->paired = 1;
-    fnew->alist = (allele*) malloc(sizeof (allele) * fragment->variants);
+    fnew->mlist = fragment->variants;
+    fnew->alist = (allele*) malloc(sizeof (allele) * fragment->mlist);
     fnew->absIS   = fragment->absIS;
     for (i = 0; i < fragment->variants; i++) {
         fnew->alist[i].varid = fragment->alist[i].varid;
@@ -329,7 +332,8 @@ int add_fragment(FRAGMENT* flist, FRAGMENT* fragment, struct alignedread* read, 
         //if (read->IS > 0) flist[fragments].matepos = read->position + read->IS; 
     else flist[fragments].matepos = read->position;
 
-    flist[fragments].alist = (allele*) malloc(sizeof (allele) * fragment->variants);
+    flist[fragments].mlist = fragment->variants;
+    flist[fragments].alist = (allele*) malloc(sizeof (allele) * fragment->mlist);
     for (i = 0; i < fragment->variants; i++) {
         flist[fragments].alist[i].varid = fragment->alist[i].varid;
         flist[fragments].alist[i].allele = fragment->alist[i].allele;
