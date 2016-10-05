@@ -204,6 +204,9 @@ int parse_bamfile_sorted(char* bamfile, HASHTABLE* ht, CHROMVARS* chromvars, VAR
         clean_fragmentlist(flist, &fragments, varlist, -1, read->position, prevchrom);
     }
     bam_destroy1(b);
+    free(read);
+    samclose(fp);
+	free(flist);
     return 0;
 }
 
@@ -294,6 +297,8 @@ int main(int argc, char** argv) {
         varlist = (VARIANT*) malloc(sizeof (VARIANT) * variants);
         chromosomes = read_variantfile_oldformat(variantfile, varlist, &ht, variants);
     }
+    free(sampleid);
+    sampleid = NULL;
     // variants is set to hetvariants only, but this is not correct since
     VARIANTS = variants;
     // there are two options, we include all variants in the chromvars datastructure but only use heterozygous variants for outputting HAIRS
@@ -328,6 +333,25 @@ int main(int argc, char** argv) {
     }
     if (logfile != NULL) fclose(logfile);
     if (fragment_file != NULL && fragment_file != stdout) fclose(fragment_file);
+
+	// Free memory
+    free(GROUPNAME);
+    destroy_hashtable(&ht);
+	for (i = 0; i < chromosomes; i++) free(chromvars[i].intervalmap);
+	free(chromvars);
+	destroy_reflist(reflist);
+    free(reflist);
+	for (i = 0; i < variants; i++) {
+		free(varlist[i].chrom);
+		free(varlist[i].allele1);
+		free(varlist[i].allele2);
+		free(varlist[i].genotype);
+		free(varlist[i].RA);
+		free(varlist[i].AA);
+	}
+	free(varlist);
+	for (i = 0; i < bamfiles; i++) free(bamfilelist[i]);
+	free(bamfilelist);
 
     return 0;
 }

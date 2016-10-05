@@ -274,6 +274,7 @@ int extract_variants_read(struct alignedread* read, HASHTABLE* ht, CHROMVARS* ch
         } else if (op == BAM_CINS) {
             if (varlist[ss].position == start + l2 && varlist[ss].type == ol && varlist[ss].heterozygous == '1' && PARSEINDELS == 1 && ss <= chromvars[chrom].last) {
                 if (IFLAG) fprintf(stdout, "%s INSERTION %d %s:%d:%s:%s\n", read->readid, start + l2, varlist[ss].chrom, varlist[ss].position, varlist[ss].RA, varlist[ss].AA);
+				extend_alist(fragment, fragment->variants+1);
                 fragment->alist[fragment->variants].varid = ss;
                 fragment->alist[fragment->variants].allele = '1';
                 fragment->alist[fragment->variants].qv = read->quality[l1];
@@ -287,6 +288,7 @@ int extract_variants_read(struct alignedread* read, HASHTABLE* ht, CHROMVARS* ch
         } else if (op == BAM_CDEL) {
             if (varlist[ss].position == start + l2 && varlist[ss].type == -1 * ol && varlist[ss].heterozygous == '1' && PARSEINDELS == 1 && ss <= chromvars[chrom].last) {
                 if (IFLAG) fprintf(stdout, "%s DELETION %d %s:%d:%s:%s\n", read->readid, start + l2, varlist[ss].chrom, varlist[ss].position, varlist[ss].RA, varlist[ss].AA);
+				extend_alist(fragment, fragment->variants+1);
                 fragment->alist[fragment->variants].varid = ss;
                 fragment->alist[fragment->variants].allele = '1';
                 fragment->alist[fragment->variants].qv = read->quality[l1];

@@ -25,6 +25,8 @@ int hashstring(char* str, int htsize);
 
 void init_hashtable(HASHTABLE* ht);
 
+void destroy_hashtable(HASHTABLE* ht);
+
 int insert_keyvalue(HASHTABLE* ht, char* key, int slen, int value);
 
 int getindex(HASHTABLE* ht, char* chrom);

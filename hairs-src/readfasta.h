@@ -42,5 +42,6 @@ int read_chromosome(REFLIST* reflist, int chrom, FILE* fp);
 int read_next_chromosome(REFLIST* reflist, int chrom, FILE* fp);
 int read_bedfile(char* bedfile, REFLIST* reflist);
 REFLIST* init_reflist(char* fastafile, REFLIST* reflist); // initialize reflist 
+void destroy_reflist(REFLIST* reflist);
 
 #endif
