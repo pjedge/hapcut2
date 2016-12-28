@@ -23,6 +23,13 @@ void init_hashtable(HASHTABLE* ht) {
     for (i = 0; i < ht->htsize; i++) ht->blist[i] = NULL; //(keyvalue*)malloc(sizeof(keyvalue)*20);
 }
 
+void destroy_hashtable(HASHTABLE* ht) {
+    free(ht->bucketlengths);
+    ht->bucketlengths = NULL;
+    free(ht->blist);
+    ht->blist = NULL;
+}
+
 int insert_keyvalue(HASHTABLE* ht, char* key, int slen, int value) {
     int hash = hashstring(key, ht->htsize);
     keyvalue* tempkey = (keyvalue*) malloc(sizeof (keyvalue));

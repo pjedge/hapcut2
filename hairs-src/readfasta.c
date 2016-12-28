@@ -35,6 +35,23 @@ REFLIST* init_reflist(char* fastafile, REFLIST* reflist) {
     return reflist;
 }
 
+void destroy_reflist(REFLIST* reflist) {
+	int i;
+    for (i = 0; i < reflist->ns; i++) {
+        free(reflist->sequences[i]);
+        free(reflist->names[i]);
+	}
+	free(reflist->sequences);
+    reflist->sequences = NULL;
+	free(reflist->names);
+    reflist->names = NULL;
+	free(reflist->lengths);
+    reflist->lengths = NULL;
+	free(reflist->offsets);
+	reflist->offsets = NULL;
+    reflist->ns = 0;
+    reflist->current = -1;
+}
 
 // this should actually be read_fastaindex
 
@@ -221,6 +238,7 @@ int read_fasta(char* seqfile, REFLIST* reflist) {
             fprintf(stderr, "\n");
         }
     }
+    kseq_destroy(seq);
     fprintf(stderr, "read reference sequence file in %.2f sec\n", (float)(clock() - t) / CLOCKS_PER_SEC);
     return 1;
 }

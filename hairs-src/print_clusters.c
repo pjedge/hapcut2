@@ -92,11 +92,16 @@ int generate_single_fragment(struct alignedread** readlist, int s, int e, int le
     int j = 0, i = 0, k = 0;
     FRAGMENT fragment;
     fragment.variants = 0;
-    fragment.alist = (allele*) malloc(sizeof (allele)*4096);
+    fragment.mlist = 4096;
+    fragment.alist = (allele*) malloc(sizeof (allele)*fragment.mlist);
     for (k = s; k < e; k++) {
         i = k;
         if (readlist[i]->IS < 0 || ((readlist[i]->flag & 1024) == 1024)) continue;
         if (readlist[i]->findex >= 0) {
+            if (fragment.variants + flist[readlist[i]->findex].variants > fragment.mlist) {
+                fragment.mlist = fragment.variants + flist[readlist[i]->findex].variants;
+                fragment.alist = (allele*) realloc(fragment.alist, sizeof (allele)*fragment.mlist);
+            }
             for (j = 0; j < flist[readlist[i]->findex].variants; j++) {
                 fragment.alist[fragment.variants].varid = flist[readlist[i]->findex].alist[j].varid;
                 fragment.alist[fragment.variants].allele = flist[readlist[i]->findex].alist[j].allele;
@@ -106,6 +111,10 @@ int generate_single_fragment(struct alignedread** readlist, int s, int e, int le
         }
         i = readlist[i]->mateindex;
         if (i >= 0 && readlist[i]->findex >= 0) {
+            if (fragment.variants + flist[readlist[i]->findex].variants > fragment.mlist) {
+                fragment.mlist = fragment.variants + flist[readlist[i]->findex].variants;
+                fragment.alist = (allele*) realloc(fragment.alist, sizeof (allele)*fragment.mlist);
+            }
             for (j = 0; j < flist[readlist[i]->findex].variants; j++) {
                 fragment.alist[fragment.variants].varid = flist[readlist[i]->findex].alist[j].varid;
                 fragment.alist[fragment.variants].allele = flist[readlist[i]->findex].alist[j].allele;
@@ -133,7 +142,8 @@ int generate_single_fragment(struct alignedread** readlist, int s, int e, int le
 
     FRAGMENT fp;
     fp.variants = 0;
-    fp.alist = (allele*) malloc(sizeof (allele) * unique_variants);
+    fp.mlist = unique_variants;
+    fp.alist = (allele*) malloc(sizeof (allele) * fp.mlist);
 
     counts[0] = counts[1] = counts[2] = counts[3] = 0;
     counts[(int) fragment.alist[0].allele - 48]++;
@@ -234,7 +244,8 @@ void print_reads_window(struct alignedread** readlist, int s, int e, FRAGMENT* f
     int i = 0, prevpos = -1;
     FRAGMENT fragment;
     fragment.variants = 0;
-    fragment.alist = (allele*) malloc(sizeof (allele)*1024);
+    fragment.mlist = 1024;
+    fragment.alist = (allele*) malloc(sizeof (allele)*fragment.mlist);
     fprintf(stdout, "cluster chr%s:%d-%d length %d reads %d\n", readlist[s]->chrom, readlist[s]->position, readlist[e - 1]->position, readlist[e - 1]->position - readlist[s]->position, e - s);
     for (i = s; i < e; i++) {
         if (readlist[i]->IS < 0 || ((readlist[i]->flag & 1024) == 1024)) continue;

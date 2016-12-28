@@ -22,6 +22,7 @@ typedef struct {
     char* id;
     int variants;
     allele* alist;
+    int mlist;
     int blocks;
     int paired;
     int matepos;
@@ -39,5 +40,7 @@ int print_fragment(FRAGMENT* fragment, VARIANT* varlist, FILE* outfile);
 int print_matepair(FRAGMENT* f1, FRAGMENT* f2, VARIANT* varlist, FILE* outfile);
 
 void clean_fragmentlist(FRAGMENT* flist, int* fragments, VARIANT* varlist, int currchrom, int currpos, int prevchrom);
+
+void extend_alist(FRAGMENT *fragment, int min_variants);
 
 #endif
